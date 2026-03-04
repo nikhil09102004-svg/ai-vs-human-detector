@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NikhilDetect — AI vs Human Detection Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#030507;--c1:#080d18;--c2:#0c1220;--c3:#101828;
+  --cyan:#00e5ff;--violet:#8b5cf6;--green:#10b981;
+  --red:#ef4444;--amber:#f59e0b;--orange:#f97316;
+  --txt:#f0f4ff;--muted:#4a5568;--dim:#2d3748;
+  --border:rgba(0,229,255,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--txt);font-family:'Rajdhani',sans-serif;font-size:16px;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 900px 600px at 10% 0%,rgba(139,92,246,0.06),transparent),
+             radial-gradient(ellipse 700px 500px at 90% 100%,rgba(0,229,255,0.05),transparent);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,229,255,0.018) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,229,255,0.018) 1px,transparent 1px);
+  background-size:48px 48px;}
+header{position:relative;z-index:10;text-align:center;padding:36px 20px 0;border-bottom:1px solid var(--border);}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(2rem,5vw,3.4rem);
+  letter-spacing:10px;background:linear-gradient(120deg,#00e5ff,#8b5cf6,#f97316);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:glow 4s ease-in-out infinite alternate;}
+@keyframes glow{from{filter:drop-shadow(0 0 10px rgba(0,229,255,0.2));}to{filter:drop-shadow(0 0 25px rgba(139,92,246,0.4));}}
+.tagline{font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:5px;color:var(--muted);margin-top:8px;}
+.tagline em{color:var(--cyan);font-style:normal;}
+.creator{display:inline-block;margin:10px auto 0;font-family:'Share Tech Mono',monospace;font-size:0.62rem;
+  letter-spacing:3px;padding:4px 14px;border:1px solid rgba(16,185,129,0.3);
+  background:rgba(16,185,129,0.05);color:var(--green);border-radius:2px;}
+nav{position:relative;z-index:10;display:flex;justify-content:center;
+  background:var(--c1);border-bottom:1px solid var(--border);}
+.tab{font-family:'Orbitron',monospace;font-size:0.62rem;letter-spacing:2px;
+  padding:16px 30px;background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--muted);cursor:pointer;transition:all 0.25s;white-space:nowrap;}
+.tab:hover{color:var(--cyan);}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan);}
+@media(max-width:580px){.tab{padding:13px 14px;font-size:0.55rem;letter-spacing:1px;}}
+main{position:relative;z-index:10;max-width:1020px;margin:0 auto;padding:28px 18px 48px;}
+.panel{display:none;animation:up 0.35s ease;}
+.panel.on{display:block;}
+@keyframes up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.card{background:var(--c1);border:1px solid var(--border);border-radius:10px;padding:26px;margin-bottom:18px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--violet),transparent);}
+.ctitle{font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--cyan);margin-bottom:18px;}
+textarea,input[type=text],input[type=password]{width:100%;background:var(--c2);border:1px solid rgba(0,229,255,0.12);border-radius:6px;color:var(--txt);font-family:'Share Tech Mono',monospace;font-size:0.9rem;padding:14px 16px;outline:none;resize:vertical;transition:border-color 0.25s,box-shadow 0.25s;}
+textarea{min-height:160px;}
+textarea:focus,input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,0.07);}
+.btn{font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:2px;padding:13px 24px;border-radius:5px;cursor:pointer;transition:all 0.25s;border:1px solid var(--cyan);background:transparent;color:var(--cyan);}
+.btn:hover{background:rgba(0,229,255,0.08);box-shadow:0 0 18px rgba(0,229,255,0.18);}
+.btn:disabled{opacity:0.35;cursor:not-allowed;}
+.btn-r{border-color:var(--red);color:var(--red);}
+.btn-r:hover{background:rgba(239,68,68,0.08);}
+.btn-g{border-color:var(--green);color:var(--green);}
+.btn-g:hover{background:rgba(16,185,129,0.08);}
+.btn-v{border-color:var(--violet);color:var(--violet);}
+.btn-v:hover{background:rgba(139,92,246,0.08);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.rbox{background:var(--c2);border:1px solid var(--border);border-radius:8px;padding:24px;margin-top:18px;display:none;animation:up 0.4s ease;}
+.rbox.on{display:block;}
+.vhero{display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:20px;}
+.vemoji{font-size:3.5rem;flex-shrink:0;line-height:1;}
+.vcontent{flex:1;min-width:180px;}
+.vlabel{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1rem,2.5vw,1.65rem);letter-spacing:3px;margin-bottom:6px;}
+.vreason{font-family:'Share Tech Mono',monospace;font-size:0.76rem;color:var(--muted);line-height:1.7;margin-top:4px;}
+.vreason strong{color:var(--txt);}
+.col-ai{color:var(--violet);}
+.col-human{color:var(--green);}
+.col-anim{color:var(--amber);}
+.col-aiart{color:var(--orange);}
+.col-strong{color:var(--green);}
+.col-medium{color:var(--amber);}
+.col-weak{color:var(--red);}
+.ring-wrap{position:relative;width:96px;height:96px;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-pct{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:700;}
+.ring-sub{font-family:'Share Tech Mono',monospace;font-size:0.52rem;color:var(--muted);margin-top:2px;}
+.barsec{margin:16px 0;}
+.brow{margin-bottom:10px;}
+.bhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.bname{font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+.bpct{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;}
+.btrack{height:8px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;}
+.bfill{height:100%;border-radius:4px;width:0%;transition:width 1.4s cubic-bezier(0.16,1,0.3,1);}
+.bai{background:linear-gradient(90deg,#4c1d95,var(--violet));}
+.bhuman{background:linear-gradient(90deg,#064e3b,var(--green));}
+.bstrong{background:linear-gradient(90deg,#064e3b,var(--green));}
+.bmedium{background:linear-gradient(90deg,#78350f,var(--amber));}
+.bweak{background:linear-gradient(90deg,#7f1d1d,var(--red));}
+.brp{background:linear-gradient(90deg,#064e3b,var(--green));}
+.bag{background:linear-gradient(90deg,#4c1d95,var(--violet));}
+.ban{background:linear-gradient(90deg,#78350f,var(--amber));}
+.baa{background:linear-gradient(90deg,#7c2d12,var(--orange));}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:8px;margin:14px 0;}
+.mc{background:var(--c3);border:1px solid rgba(255,255,255,0.04);border-radius:6px;padding:10px;text-align:center;}
+.mcv{font-family:'Share Tech Mono',monospace;font-size:0.88rem;color:var(--cyan);}
+.mcl{font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:var(--muted);margin-top:3px;}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+@media(max-width:640px){.cgrid{grid-template-columns:1fr;}}
+.cbox{background:var(--c3);border:1px solid rgba(255,255,255,0.04);border-radius:6px;padding:14px;}
+.clbl{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:10px;}
+.cwrap{height:190px;position:relative;}
+.sigs{margin-top:14px;}
+.sig{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.sig:last-child{border:none;}
+.sig-ico{font-size:1.2rem;flex-shrink:0;}
+.sig-t{font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:2px;margin-bottom:3px;}
+.sig-t.ai{color:var(--violet);}
+.sig-t.human{color:var(--green);}
+.sig-t.anim{color:var(--amber);}
+.sig-d{font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);line-height:1.5;}
+.sig-d strong{color:var(--txt);}
+.how{background:var(--c1);border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:18px;}
+.how-t{font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--cyan);margin-bottom:14px;}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:580px){.hgrid{grid-template-columns:1fr;}}
+.hcard{background:var(--c2);border-radius:6px;padding:14px;border-left:3px solid var(--dim);}
+.hcard.hc-g{border-left-color:var(--green);}
+.hcard.hc-v{border-left-color:var(--violet);}
+.hcard.hc-a{border-left-color:var(--amber);}
+.hcard.hc-o{border-left-color:var(--orange);}
+.hcard h4{font-family:'Orbitron',monospace;font-size:0.62rem;letter-spacing:2px;margin-bottom:8px;}
+.hcard.hc-g h4{color:var(--green);}
+.hcard.hc-v h4{color:var(--violet);}
+.hcard.hc-a h4{color:var(--amber);}
+.hcard.hc-o h4{color:var(--orange);}
+.hcard p{font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--muted);line-height:1.6;}
+.how-explain{margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--muted);line-height:1.7;padding:12px;background:var(--c2);border-radius:6px;border-left:3px solid var(--cyan);}
+.how-explain strong{color:var(--cyan);}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:660px){.pgrid{grid-template-columns:1fr;}}
+.reqs{margin:12px 0;}
+.req{font-family:'Share Tech Mono',monospace;font-size:0.72rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--muted);transition:color 0.25s;}
+.req.pass{color:var(--green);}
+.req.pass::before{content:'✓ ';}
+.req.fail{color:var(--red);}
+.req.fail::before{content:'✗ ';}
+.req.neu::before{content:'· ';}
+.sbar{display:flex;gap:3px;margin:10px 0;}
+.seg{flex:1;height:7px;border-radius:2px;background:rgba(255,255,255,0.05);transition:background 0.3s;}
+.prow{display:flex;gap:8px;align-items:center;}
+.prow input{flex:1;}
+.eyebtn{font-family:'Share Tech Mono',monospace;font-size:0.65rem;padding:8px 12px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--muted);cursor:pointer;border-radius:4px;white-space:nowrap;transition:all 0.2s;}
+.eyebtn:hover{border-color:var(--cyan);color:var(--cyan);}
+.slbl{font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--muted);margin-bottom:10px;}
+.sug{font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:7px 12px;border-left:2px solid var(--amber);background:rgba(245,158,11,0.04);color:var(--txt);margin-bottom:4px;border-radius:0 4px 4px 0;}
+.trow{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+.tog{position:relative;width:36px;height:19px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;}
+.togs{position:absolute;inset:0;background:var(--c3);border:1px solid rgba(255,255,255,0.1);cursor:pointer;transition:0.25s;border-radius:19px;}
+.togs::before{content:'';position:absolute;width:11px;height:11px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:0.25s;}
+input:checked+.togs{background:rgba(0,229,255,0.12);border-color:var(--cyan);}
+input:checked+.togs::before{transform:translateX(17px);background:var(--cyan);}
+.lrow{margin:12px 0;}
+.llbl{font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);margin-bottom:6px;}
+.llbl span{color:var(--cyan);font-weight:bold;}
+input[type=range]{width:100%;accent-color:var(--cyan);}
+.gpw{font-family:'Share Tech Mono',monospace;font-size:0.9rem;padding:10px 14px;background:rgba(0,229,255,0.04);border:1px dashed rgba(0,229,255,0.25);color:var(--cyan);letter-spacing:2px;word-break:break-all;border-radius:5px;margin-top:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.cpybtn{font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:4px 10px;background:transparent;border:1px solid rgba(0,229,255,0.3);color:var(--cyan);cursor:pointer;border-radius:3px;white-space:nowrap;flex-shrink:0;transition:all 0.2s;}
+.cpybtn:hover{background:rgba(0,229,255,0.1);}
+.dz{border:2px dashed rgba(0,229,255,0.18);border-radius:8px;padding:50px 20px;text-align:center;cursor:pointer;position:relative;transition:all 0.3s;background:radial-gradient(ellipse at center,rgba(0,229,255,0.02),transparent 70%);}
+.dz:hover,.dz.drag{border-color:var(--cyan);background:radial-gradient(ellipse at center,rgba(0,229,255,0.05),transparent 70%);}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.dzi{font-size:2.8rem;margin-bottom:10px;display:block;animation:bob 3s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.dzt{font-family:'Orbitron',monospace;font-size:0.8rem;letter-spacing:2px;color:var(--txt);margin-bottom:5px;}
+.dzh{font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--muted);}
+.fmts{display:flex;justify-content:center;gap:5px;margin-top:10px;flex-wrap:wrap;}
+.fmt{font-family:'Share Tech Mono',monospace;font-size:0.58rem;padding:3px 8px;border:1px solid rgba(0,229,255,0.15);color:rgba(0,229,255,0.5);border-radius:2px;}
+#imgPrev{display:none;margin-top:18px;}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:560px){.igrid{grid-template-columns:1fr;}}
+.ibox{background:var(--c2);border:1px solid var(--border);border-radius:6px;padding:12px;}
+.ibox img{max-width:100%;max-height:230px;display:block;margin:0 auto;border-radius:3px;}
+.ilbl{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;}
+.ichips{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:7px;margin-bottom:14px;}
+.ichip{background:var(--c2);border:1px solid rgba(255,255,255,0.04);border-radius:5px;padding:8px;text-align:center;}
+.icv{font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--cyan);}
+.icl{font-family:'Share Tech Mono',monospace;font-size:0.57rem;color:var(--muted);margin-top:2px;}
+.catrow{padding:10px 14px;background:var(--c3);border-radius:5px;border:1px solid transparent;margin-bottom:8px;transition:border-color 0.3s;}
+.catrow.win{border-color:rgba(0,229,255,0.2);}
+.cathdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.catname{font-family:'Share Tech Mono',monospace;font-size:0.7rem;display:flex;align-items:center;gap:7px;}
+.wbadge{font-size:0.52rem;padding:2px 7px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:var(--cyan);border-radius:2px;}
+.catpct{font-family:'Orbitron',monospace;font-size:0.88rem;font-weight:700;}
+#scan{position:fixed;inset:0;background:rgba(3,5,7,0.95);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+#scan.on{display:flex;}
+.sbox{width:180px;height:180px;position:relative;border:1px solid rgba(0,229,255,0.12);}
+.sc{position:absolute;width:14px;height:14px;border-style:solid;border-color:var(--cyan);border-width:0;}
+.sc.tl{top:-1px;left:-1px;border-top-width:2px;border-left-width:2px;}
+.sc.tr{top:-1px;right:-1px;border-top-width:2px;border-right-width:2px;}
+.sc.bl{bottom:-1px;left:-1px;border-bottom-width:2px;border-left-width:2px;}
+.sc.br{bottom:-1px;right:-1px;border-bottom-width:2px;border-right-width:2px;}
+.sbeam{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);box-shadow:0 0 10px var(--cyan);animation:beam 1.6s ease-in-out infinite;}
+@keyframes beam{0%{top:0;opacity:0;}8%{opacity:1;}92%{opacity:1;}100%{top:178px;opacity:0;}}
+.smsg{font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--cyan);letter-spacing:2px;text-align:center;}
+.spbar{width:180px;height:3px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;}
+.spfill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:2px;transition:width 0.4s ease;width:0%;}
+.toast{position:fixed;bottom:22px;right:22px;z-index:600;background:var(--c1);border:1px solid var(--cyan);color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:0.72rem;padding:10px 16px;border-radius:5px;opacity:0;transform:translateY(8px);transition:all 0.3s;pointer-events:none;}
+.toast.on{opacity:1;transform:translateY(0);}
+footer{position:relative;z-index:10;text-align:center;padding:22px;border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);}
+footer em{color:var(--cyan);font-style:normal;}
+#offC{display:none;}
+</style>
+</head>
+<body>
+<canvas id="offC"></canvas>
+<div id="scan">
+  <div class="sbox"><div class="sc tl"></div><div class="sc tr"></div><div class="sc bl"></div><div class="sc br"></div><div class="sbeam"></div></div>
+  <div class="smsg" id="smsg">ANALYZING...</div>
+  <div class="spbar"><div class="spfill" id="sfill"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<header>
+  <div class="logo">NIKHILDETECT</div>
+  <div class="tagline">AI vs HUMAN DETECTION · <em>TEXT</em> · <em>PASSWORD</em> · <em>IMAGE</em></div>
+  <div class="creator">✦ CREATED BY NIKHIL ✦</div>
+  <div style="height:18px;"></div>
+</header>
+
+<nav>
+  <button class="tab on" onclick="showTab('text',this)">① TEXT DETECT</button>
+  <button class="tab" onclick="showTab('password',this)">② PASSWORD</button>
+  <button class="tab" onclick="showTab('image',this)">③ IMAGE DETECT</button>
+</nav>
+
+<main>
+
+<!-- ═══════════ PANEL 1 — TEXT ═══════════ -->
+<div class="panel on" id="panel-text">
+  <div class="card">
+    <div class="ctitle">◈ AI vs HUMAN TEXT DETECTOR</div>
+    <textarea id="tin" placeholder="Paste any text here to analyze...&#10;&#10;Examples:&#10;• An essay or article paragraph&#10;• An email or WhatsApp message&#10;• A social media caption&#10;• Any writing you want to verify&#10;&#10;Minimum 30 characters needed."></textarea>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:8px;" id="tcount">0 characters · 0 words</div>
+    <div class="btn-row">
+      <button class="btn" id="tbtn" onclick="analyzeText()">◈ ANALYZE TEXT</button>
+      <button class="btn btn-r" onclick="clearText()">✕ CLEAR</button>
+    </div>
+  </div>
+
+  <div class="rbox" id="tres">
+    <div class="vhero">
+      <div class="vemoji" id="te">🔍</div>
+      <div class="vcontent">
+        <div class="vlabel" id="tl">—</div>
+        <div class="vreason" id="tr"></div>
+      </div>
+      <div class="ring-wrap">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none"/>
+          <circle cx="48" cy="48" r="40" id="tr-ring" stroke="#10b981" stroke-width="8" fill="none" stroke-dasharray="0 251" stroke-linecap="round" style="transition:stroke-dasharray 1.5s cubic-bezier(0.16,1,0.3,1)"/>
+        </svg>
+        <div class="ring-c"><div class="ring-pct" id="tr-pct">0%</div><div class="ring-sub">CONFIDENCE</div></div>
+      </div>
+    </div>
+    <div class="barsec">
+      <div class="brow"><div class="bhdr"><span class="bname">🤖 AI GENERATED PROBABILITY</span><span class="bpct" id="t-aip" style="color:var(--violet)">0%</span></div><div class="btrack"><div class="bfill bai" id="t-aib"></div></div></div>
+      <div class="brow"><div class="bhdr"><span class="bname">✍ HUMAN WRITTEN PROBABILITY</span><span class="bpct" id="t-hp" style="color:var(--green)">0%</span></div><div class="btrack"><div class="bfill bhuman" id="t-hb"></div></div></div>
+    </div>
+    <div class="mgrid" id="t-met"></div>
+    <div class="cgrid">
+      <div class="cbox"><div class="clbl">WRITING PATTERN RADAR</div><div class="cwrap"><canvas id="t-rad"></canvas></div></div>
+      <div class="cbox"><div class="clbl">SENTENCE LENGTH DISTRIBUTION</div><div class="cwrap"><canvas id="t-cht"></canvas></div></div>
+    </div>
+    <div class="sigs" id="t-sigs"></div>
+  </div>
+
+  <div class="how">
+    <div class="how-t">◈ HOW TEXT DETECTION WORKS</div>
+    <div class="hgrid">
+      <div class="hcard hc-v"><h4>🤖 AI GENERATED TEXT — SIGNS</h4><p>Uses "Furthermore", "Moreover", "In conclusion" · Perfect grammar always · All sentences are similar length · No contractions like don't/can't · Generic explanations · Sounds like a textbook · Lists ideas neatly · No personal opinions or stories</p></div>
+      <div class="hcard hc-g"><h4>✍ HUMAN WRITTEN TEXT — SIGNS</h4><p>Sentence lengths vary naturally · Uses contractions (don't, won't, I'm) · Personal opinions and feelings · Informal slang and expressions · Topic drifts a little · May have small typos · Unique personal voice · Feels real and lived-in</p></div>
+    </div>
+    <div class="how-explain"><strong>HOW IT WORKS:</strong> The system measures 8 things: sentence length variation (burstiness), vocabulary richness (unique words %), use of formal connector words, word repetition patterns, punctuation variety, average word length, filler word density, and phrase uniqueness. These 8 signals are combined to give the final AI vs Human probability score.</div>
+  </div>
+</div>
+
+<!-- ═══════════ PANEL 2 — PASSWORD ═══════════ -->
+<div class="panel" id="panel-password">
+  <div class="pgrid">
+    <div class="card">
+      <div class="ctitle">◈ PASSWORD ANALYZER</div>
+      <div class="prow"><input type="password" id="pwin" placeholder="Type or paste your password..." oninput="livePw()"><button class="eyebtn" id="eyebtn" onclick="toggleEye()">👁 SHOW</button></div>
+      <div class="reqs">
+        <div class="req neu" id="r0">8 or more characters</div>
+        <div class="req neu" id="r1">Uppercase letter (A–Z)</div>
+        <div class="req neu" id="r2">Lowercase letter (a–z)</div>
+        <div class="req neu" id="r3">Number (0–9)</div>
+        <div class="req neu" id="r4">Special character (!@#$%...)</div>
+        <div class="req neu" id="r5">Not a common/guessable word</div>
+      </div>
+      <div class="sbar"><div class="seg" id="s0"></div><div class="seg" id="s1"></div><div class="seg" id="s2"></div><div class="seg" id="s3"></div><div class="seg" id="s4"></div></div>
+      <div class="slbl" id="slbl">Enter a password to check strength</div>
+      <div class="btn-row">
+        <button class="btn" id="pbtn" onclick="analyzePassword()">◈ ANALYZE</button>
+        <button class="btn btn-r" onclick="resetPw()">✕ CLEAR</button>
+      </div>
+      <div class="rbox" id="pres">
+        <div class="vhero">
+          <div class="vemoji" id="pe">🔒</div>
+          <div class="vcontent"><div class="vlabel" id="pl">—</div><div class="vreason" id="pr"></div></div>
+          <div class="ring-wrap">
+            <svg width="96" height="96" viewBox="0 0 96 96">
+              <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none"/>
+              <circle cx="48" cy="48" r="40" id="pr-ring" stroke="#10b981" stroke-width="8" fill="none" stroke-dasharray="0 251" stroke-linecap="round" style="transition:stroke-dasharray 1.5s cubic-bezier(0.16,1,0.3,1)"/>
+            </svg>
+            <div class="ring-c"><div class="ring-pct" id="pr-pct">0%</div><div class="ring-sub">STRENGTH</div></div>
+          </div>
+        </div>
+        <div class="barsec">
+          <div class="brow"><div class="bhdr"><span class="bname">💪 STRENGTH SCORE</span><span class="bpct" id="p-sp" style="color:var(--green)">0%</span></div><div class="btrack"><div class="bfill" id="p-sb"></div></div></div>
+          <div class="brow"><div class="bhdr"><span class="bname">🤖 AI / TOOL GENERATED</span><span class="bpct" id="p-aip" style="color:var(--violet)">0%</span></div><div class="btrack"><div class="bfill bai" id="p-aib"></div></div></div>
+          <div class="brow"><div class="bhdr"><span class="bname">🧠 HUMAN CREATED</span><span class="bpct" id="p-hp" style="color:var(--green)">0%</span></div><div class="btrack"><div class="bfill bhuman" id="p-hb"></div></div></div>
+        </div>
+        <div class="mgrid" id="p-met"></div>
+        <div id="p-sugs"></div>
+        <div class="sigs" id="p-sigs"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">◈ PASSWORD GENERATOR</div>
+      <div class="trow"><label class="tog"><input type="checkbox" id="gU" checked><span class="togs"></span></label>Uppercase (A–Z)</div>
+      <div class="trow"><label class="tog"><input type="checkbox" id="gL" checked><span class="togs"></span></label>Lowercase (a–z)</div>
+      <div class="trow"><label class="tog"><input type="checkbox" id="gN" checked><span class="togs"></span></label>Numbers (0–9)</div>
+      <div class="trow"><label class="tog"><input type="checkbox" id="gS" checked><span class="togs"></span></label>Special (!@#$%^&*)</div>
+      <div class="trow"><label class="tog"><input type="checkbox" id="gM"><span class="togs"></span></label>Memorable words</div>
+      <div class="lrow"><div class="llbl">LENGTH: <span id="lv">16</span> characters</div><input type="range" id="lr" min="8" max="32" value="16" oninput="document.getElementById('lv').textContent=this.value"></div>
+      <div class="btn-row"><button class="btn btn-g" onclick="genPw(1)">⚡ GENERATE</button><button class="btn btn-v" onclick="genPw(3)">⚡ BATCH ×3</button></div>
+      <div id="gout" style="margin-top:12px;"></div>
+      <div style="margin-top:20px;">
+        <div style="font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:3px;color:var(--cyan);margin-bottom:12px;">◈ HOW PASSWORD DETECTION WORKS</div>
+        <div class="hcard hc-v" style="margin-bottom:10px;"><h4>🤖 AI / TOOL GENERATED SIGNS</h4><p>Completely random mix · All 4 character types · High entropy · No real words · Perfect randomness · Made by password managers (LastPass, 1Password) or AI tools</p></div>
+        <div class="hcard hc-g"><h4>🧠 HUMAN CREATED SIGNS</h4><p>Contains real words or names · Has birth year or date · Keyboard patterns (qwerty, 1234) · Word+numbers (nikhil123) · Letter swaps (a→@, i→1, e→3) · Meaningful to the person</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PANEL 3 — IMAGE ═══════════ -->
+<div class="panel" id="panel-image">
+
+  <div class="card">
+    <div class="ctitle">◈ REAL PHOTO vs AI / FAKE IMAGE DETECTOR</div>
+    <div class="dz" id="dz">
+      <input type="file" id="iin" accept="image/*" onchange="onImg(event)">
+      <span class="dzi">📷</span>
+      <div class="dzt">DROP IMAGE HERE OR CLICK TO UPLOAD</div>
+      <div class="dzh">Detects if image is a REAL human photo OR an AI / fake / cartoon image</div>
+      <div class="fmts"><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">GIF</span><span class="fmt">WEBP</span><span class="fmt">BMP</span></div>
+    </div>
+    <div id="imgPrev">
+      <div class="igrid">
+        <div class="ibox"><div class="ilbl">UPLOADED IMAGE</div><img id="pimg" alt="preview"></div>
+        <div class="ibox"><div class="ilbl">PIXEL ANALYSIS MAP</div><canvas id="nmap" style="width:100%;border-radius:4px;image-rendering:pixelated;"></canvas></div>
+      </div>
+      <div class="ichips" id="ichips"></div>
+      <div class="btn-row">
+        <button class="btn" id="ibtn" onclick="analyzeImg()">◈ ANALYZE IMAGE</button>
+        <button class="btn btn-r" onclick="resetImg()">✕ RESET</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result box -->
+  <div class="rbox" id="ires">
+
+    <!-- Big verdict banner -->
+    <div id="iverdictBanner" style="text-align:center;padding:24px 20px 20px;margin-bottom:20px;border-radius:8px;border:2px solid #10b981;background:rgba(16,185,129,0.05);">
+      <div id="ivIcon" style="font-size:4rem;margin-bottom:10px;">📸</div>
+      <div id="ivLabel" style="font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1.2rem,3vw,2rem);letter-spacing:3px;color:#10b981;margin-bottom:8px;">REAL HUMAN PHOTO</div>
+      <div id="ivSub" style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--muted);max-width:560px;margin:0 auto;line-height:1.7;"></div>
+    </div>
+
+    <!-- Confidence + two bars -->
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px;">
+      <div class="ring-wrap">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none"/>
+          <circle cx="48" cy="48" r="40" id="ir-ring" stroke="#10b981" stroke-width="8" fill="none" stroke-dasharray="0 251" stroke-linecap="round" style="transition:stroke-dasharray 1.5s cubic-bezier(0.16,1,0.3,1)"/>
+        </svg>
+        <div class="ring-c"><div class="ring-pct" id="ir-pct">0%</div><div class="ring-sub">CONFIDENCE</div></div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div class="brow">
+          <div class="bhdr"><span class="bname">📸 REAL HUMAN PHOTO</span><span class="bpct" id="ipReal" style="color:#10b981">0%</span></div>
+          <div class="btrack"><div class="bfill brp" id="ibReal"></div></div>
+        </div>
+        <div class="brow">
+          <div class="bhdr"><span class="bname">🤖 AI / FAKE IMAGE</span><span class="bpct" id="ipFake" style="color:#8b5cf6">0%</span></div>
+          <div class="btrack"><div class="bfill bag" id="ibFake"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pixel metrics row -->
+    <div class="mgrid" id="i-met"></div>
+
+    <!-- Charts -->
+    <div class="cgrid">
+      <div class="cbox"><div class="clbl">SIGNAL ANALYSIS RADAR</div><div class="cwrap"><canvas id="i-rad"></canvas></div></div>
+      <div class="cbox"><div class="clbl">BRIGHTNESS DISTRIBUTION</div><div class="cwrap"><canvas id="i-his"></canvas></div></div>
+    </div>
+
+    <!-- Explanation signals -->
+    <div style="font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:3px;color:var(--cyan);margin:16px 0 10px;">◈ DETECTION SIGNALS — WHY THIS VERDICT</div>
+    <div class="sigs" id="i-sigs"></div>
+  </div>
+
+  <!-- How it works -->
+  <div class="how">
+    <div class="how-t">◈ HOW IMAGE DETECTION WORKS</div>
+    <div class="hgrid">
+      <div class="hcard hc-g">
+        <h4>📸 REAL HUMAN PHOTO</h4>
+        <p>A genuine photo taken by a real person on their phone or camera. Shows real things from the real world — people, places, food, nature, streets, buildings. Has natural camera grain/noise. Real lighting and real shadows. Nothing is "too perfect". The image is unedited and unfiltered.</p>
+      </div>
+      <div class="hcard hc-v">
+        <h4>🤖 AI / FAKE IMAGE</h4>
+        <p>ANY image that was NOT taken by a real camera. This includes: AI-generated images (made by Midjourney, DALL-E, Stable Diffusion, etc.) · Cartoons and animations (drawn or 3D rendered) · Anime style art · Fantasy / unrealistic illustrations · Fake or digitally created scenes that never existed in the real world.</p>
+      </div>
+    </div>
+    <div class="how-explain">
+      <strong>KEY SIGNAL — CAMERA NOISE:</strong> Every real photo taken by a phone or camera always has natural sensor grain (noise level 10–70). AI-generated images and cartoons have near-zero noise because they are created by software, not captured by a lens. This is the single most reliable way to tell them apart. Additional signals: color palette complexity, flat region ratio, edge type, gradient smoothness, and texture frequency.
+    </div>
+  </div>
+
+</div>
+
+
+</main>
+<footer><em>NIKHILDETECT</em> · AI vs Human Detection Suite · Text · Password · Image · <em>Created by Nikhil</em></footer>
+
+<script>
+'use strict';
+// ══ UTILS ══
+let TT;
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('on');clearTimeout(TT);TT=setTimeout(()=>e.classList.remove('on'),3000);}
+function showScan(m){document.getElementById('smsg').textContent=m;document.getElementById('sfill').style.width='0%';document.getElementById('scan').classList.add('on');}
+function setScan(p,m){document.getElementById('sfill').style.width=p+'%';document.getElementById('smsg').textContent=m;}
+function hideScan(){document.getElementById('scan').classList.remove('on');}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function showTab(id,b){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));document.getElementById('panel-'+id).classList.add('on');b.classList.add('on');}
+let CH={};
+function kc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
+function setRing(id,pct,col){const c=2*Math.PI*40;const el=document.getElementById(id);if(!el)return;el.setAttribute('stroke-dasharray',`${(pct/100)*c} ${c}`);el.setAttribute('stroke',col);}
+
+// ══ CLAUDE API ══
+async function claude(msgs,tok=1200){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:tok,
+      messages:msgs
+    })
+  });
+  if(!r.ok){const err=await r.text();console.error('API error:',r.status,err);throw new Error('API '+r.status);}
+  const d=await r.json();
+  if(!d.content||!d.content[0])throw new Error('no response');
+  let raw=d.content.map(c=>c.text||'').join('').trim();
+  raw=raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+  const m=raw.match(/\{[\s\S]*\}/);
+  if(!m)throw new Error('no JSON in response');
+  return JSON.parse(m[0]);
+}
+
+// ══════════ TEXT ══════════
+document.getElementById('tin').addEventListener('input',updateCount);
+function updateCount(){const t=document.getElementById('tin').value;document.getElementById('tcount').textContent=`${t.length} characters · ${t.trim().split(/\s+/).filter(Boolean).length} words`;}
+function clearText(){document.getElementById('tin').value='';document.getElementById('tres').classList.remove('on');updateCount();}
+
+function textMetrics(tx){
+  const words=tx.trim().split(/\s+/).filter(Boolean);
+  const sents=tx.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>4);
+  const sLens=sents.map(s=>s.split(/\s+/).filter(Boolean).length);
+  const avgSL=sLens.length?sLens.reduce((a,b)=>a+b,0)/sLens.length:0;
+  const varSL=sLens.length?sLens.reduce((a,b)=>a+(b-avgSL)**2,0)/sLens.length:0;
+  const burst=avgSL>0?Math.sqrt(varSL)/avgSL:0;
+  const cl=words.map(w=>w.toLowerCase().replace(/[^a-z]/g,''));
+  const uniq=new Set(cl.filter(w=>w.length>2));
+  const vrich=words.length?uniq.size/words.length:0;
+  const FL=['furthermore','moreover','additionally','consequently','therefore','however','nevertheless','subsequently','accordingly','thus','hence','indeed','notably','importantly','significantly'];
+  const fc=cl.filter(w=>FL.includes(w)).length;
+  const fratio=words.length?fc/words.length:0;
+  const bg=[];for(let i=0;i<words.length-1;i++)bg.push(cl[i]+' '+cl[i+1]);
+  const ub=new Set(bg);const rep=bg.length?1-(ub.size/bg.length):0;
+  const pset=new Set((tx.match(/[.,;:!?'"()\-—]/g)||[]));
+  const awl=words.length?words.reduce((a,b)=>a+b.length,0)/words.length:0;
+  const bk=new Array(10).fill(0);sLens.forEach(l=>bk[Math.min(9,Math.floor(l/5))]++);
+  return{words:words.length,sents:sents.length,avgSL:+avgSL.toFixed(1),burst:+burst.toFixed(3),vrich:+vrich.toFixed(3),fratio:+fratio.toFixed(4),pv:pset.size,rep:+rep.toFixed(3),awl:+awl.toFixed(2),sLens,bk,chars:tx.length};
+}
+
+function textFallback(m){
+  let ai=50;
+  if(m.burst<0.2)ai+=18;else if(m.burst<0.4)ai+=8;else if(m.burst>0.8)ai-=15;else if(m.burst>0.6)ai-=8;
+  if(m.fratio>0.015)ai+=12;else if(m.fratio>0.008)ai+=6;
+  if(m.vrich<0.45)ai+=10;else if(m.vrich>0.7)ai-=12;
+  if(m.rep>0.35)ai+=10;else if(m.rep<0.15)ai-=8;
+  if(m.pv<4)ai+=8;else if(m.pv>8)ai-=8;
+  if(m.awl>6.5)ai+=6;else if(m.awl<4.5)ai-=6;
+  ai=Math.max(5,Math.min(95,Math.round(ai)));
+  const isAI=ai>50;
+  return{isAI,ai,human:100-ai,conf:Math.abs(ai-50)+50,
+    verdict:isAI?'AI GENERATED TEXT':'HUMAN WRITTEN TEXT',
+    reason:`<strong>${isAI?'AI writing patterns detected':'Human writing patterns detected'}</strong><br><br>Sentence variety (burstiness): <strong>${m.burst}</strong> · Vocabulary richness: <strong>${(m.vrich*100).toFixed(0)}%</strong> · Formal connectors: <strong>${(m.fratio*100).toFixed(2)}%</strong>`,
+    sigs:[
+      {i:isAI?'🤖':'✍',t:m.burst<0.3?'LOW SENTENCE VARIATION':'NATURAL SENTENCE VARIATION',cls:m.burst<0.3?'ai':'human',d:`<strong>Burstiness: ${m.burst}</strong> — ${m.burst<0.3?'Very uniform sentence lengths is a strong AI indicator. AI writes consistent, similar-length sentences.':'Natural variation in sentence lengths suggests human writing style.'}`},
+      {i:m.fratio>0.01?'🤖':'✍',t:m.fratio>0.01?'FORMAL AI CONNECTORS FOUND':'NATURAL LANGUAGE FLOW',cls:m.fratio>0.01?'ai':'human',d:`<strong>${(m.fratio*100).toFixed(2)}% formal connectors</strong> — ${m.fratio>0.01?'Words like "Furthermore", "Moreover", "Consequently" are classic AI patterns.':'Low use of formal transition words suggests natural human writing.'}`},
+      {i:m.vrich<0.5?'🤖':'✍',t:m.vrich<0.5?'LIMITED VOCABULARY RANGE':'RICH VOCABULARY',cls:m.vrich<0.5?'ai':'human',d:`<strong>${(m.vrich*100).toFixed(0)}% unique words</strong> — ${m.vrich<0.5?'Lower vocabulary diversity is common in AI-generated text.':'High vocabulary diversity is a strong indicator of human authorship.'}`},
+      {i:m.rep>0.3?'🤖':'✍',t:m.rep>0.3?'REPETITIVE PATTERNS':'DIVERSE PHRASING',cls:m.rep>0.3?'ai':'human',d:`<strong>Repetition score: ${m.rep}</strong> — ${m.rep>0.3?'Same word combinations repeat frequently, a common AI generation pattern.':'Low phrase repetition indicates organic human writing without mechanical patterns.'}`}
+    ]};
+}
+
+async function analyzeText(){
+  const tx=document.getElementById('tin').value.trim();
+  if(tx.length<30){toast('⚠ Enter at least 30 characters');return;}
+  document.getElementById('tbtn').disabled=true;
+  document.getElementById('tres').classList.remove('on');
+  const m=textMetrics(tx);
+  const steps=['READING TEXT...','MEASURING SENTENCE PATTERNS...','CHECKING VOCABULARY RICHNESS...','DETECTING AI CONNECTOR WORDS...','RUNNING DEEP ANALYSIS...'];
+  showScan(steps[0]);let si=0;
+  const iv=setInterval(()=>{if(si<steps.length){setScan((si+1)/steps.length*80,steps[si]);si++;}},380);
+  let R;
+  try{
+    const prompt=`You are an expert AI vs Human text detection system. Analyze this text carefully.
+
+TEXT TO ANALYZE:
+"""
+${tx.substring(0,2500)}
+"""
+
+MEASURED METRICS:
+- Words: ${m.words} | Sentences: ${m.sents}
+- Avg sentence length: ${m.avgSL} words
+- Burstiness (sentence length variety): ${m.burst} — LOW=AI, HIGH=Human
+- Vocabulary richness: ${(m.vrich*100).toFixed(1)}% unique words
+- Formal connector ratio: ${(m.fratio*100).toFixed(2)}% (Furthermore/Moreover/etc)
+- Phrase repetition score: ${m.rep}
+- Punctuation variety: ${m.pv} types
+- Average word length: ${m.awl} chars
+
+AI TEXT SIGNS: uniform sentence length, formal transitions, perfect grammar, no contractions, generic phrasing, textbook tone, hedging language, bullet-point thinking in prose.
+HUMAN TEXT SIGNS: varying sentence lengths, contractions (don't/can't/I'm), personal opinions, informal words, emotional language, topic drift, unique voice, slight imperfections.
+
+Respond ONLY with this JSON (no other text, no markdown):
+{"verdict":"AI_GENERATED","ai_probability":82,"human_probability":18,"confidence":82,"primary_reason":"Short one-line reason","detailed_reason":"2-3 sentences of specific patterns found","signals":[{"title":"Signal name","description":"What you found and why it matters","type":"ai"},{"title":"Signal name","description":"Detail","type":"ai"},{"title":"Signal name","description":"Detail","type":"human"},{"title":"Signal name","description":"Detail","type":"human"}]}`;
+    clearInterval(iv);setScan(88,'RUNNING DEEP ANALYSIS...');
+    const res=await claude([{role:'user',content:prompt}]);
+    setScan(100,'DONE!');await sleep(300);hideScan();
+    const isAI=res.verdict==='AI_GENERATED';
+    R={isAI,ai:Math.min(99,Math.max(1,parseInt(res.ai_probability)||50)),human:Math.min(99,Math.max(1,parseInt(res.human_probability)||50)),conf:Math.min(99,Math.max(1,parseInt(res.confidence)||50)),verdict:isAI?'AI GENERATED TEXT':'HUMAN WRITTEN TEXT',reason:`<strong>${res.primary_reason}</strong><br><br>${res.detailed_reason}`,sigs:(res.signals||[]).map(s=>({i:s.type==='ai'?'🤖':'✍',t:s.title.toUpperCase(),cls:s.type,d:`<strong>${s.description}</strong>`}))};
+    toast('✓ Analysis complete!');
+  }catch(e){clearInterval(iv);hideScan();R=textFallback(m);toast('⚡ Analysis complete');}
+  displayText(R,m);
+  document.getElementById('tbtn').disabled=false;
+}
+
+function displayText(R,m){
+  document.getElementById('tres').classList.add('on');
+  const col=R.isAI?'#8b5cf6':'#10b981';
+  document.getElementById('te').textContent=R.isAI?'🤖':'✍';
+  const le=document.getElementById('tl');le.textContent=R.verdict;le.className='vlabel '+(R.isAI?'col-ai':'col-human');
+  document.getElementById('tr').innerHTML=R.reason;
+  setTimeout(()=>{
+    setRing('tr-ring',R.conf,col);
+    document.getElementById('tr-pct').textContent=R.conf+'%';document.getElementById('tr-pct').style.color=col;
+    document.getElementById('t-aib').style.width=R.ai+'%';document.getElementById('t-hb').style.width=R.human+'%';
+    document.getElementById('t-aip').textContent=R.ai+'%';document.getElementById('t-hp').textContent=R.human+'%';
+  },200);
+  document.getElementById('t-met').innerHTML=[{v:m.words,l:'WORDS'},{v:m.sents,l:'SENTENCES'},{v:m.avgSL,l:'AVG SENT LEN'},{v:m.burst,l:'BURSTINESS'},{v:(m.vrich*100).toFixed(0)+'%',l:'VOCAB RICH'},{v:m.pv,l:'PUNCT TYPES'},{v:m.awl,l:'AVG WORD LEN'},{v:(m.fratio*100).toFixed(2)+'%',l:'FILLER %'}].map(x=>`<div class="mc"><div class="mcv">${x.v}</div><div class="mcl">${x.l}</div></div>`).join('');
+  kc('t-rad');CH['t-rad']=new Chart(document.getElementById('t-rad'),{type:'radar',data:{labels:['Burstiness','Vocab Rich','Punct Var','Low Filler','Uniqueness','Natural Flow'],datasets:[{label:'This Text',data:[Math.min(100,m.burst*120),(m.vrich*100),m.pv*7,Math.max(0,100-(m.fratio*3000)),Math.min(100,(1-m.rep)*120),R.human],borderColor:col,backgroundColor:R.isAI?'rgba(139,92,246,0.1)':'rgba(16,185,129,0.1)',pointBackgroundColor:col,borderWidth:2,pointRadius:3},{label:'Human Baseline',data:[65,72,70,80,75,80],borderColor:'rgba(255,255,255,0.12)',backgroundColor:'transparent',borderDash:[5,5],pointRadius:2,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#4a5568',font:{family:'Share Tech Mono',size:10}}}},scales:{r:{angleLines:{color:'rgba(255,255,255,0.04)'},grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#4a5568',backdropColor:'transparent',font:{size:8}},pointLabels:{color:'#718096',font:{size:9,family:'Share Tech Mono'}}}}}});
+  kc('t-cht');CH['t-cht']=new Chart(document.getElementById('t-cht'),{type:'bar',data:{labels:['1-5','6-10','11-15','16-20','21-25','26-30','31-35','36-40','41-45','46+'],datasets:[{label:'Sentences',data:m.bk,backgroundColor:R.isAI?'rgba(139,92,246,0.5)':'rgba(16,185,129,0.5)',borderColor:R.isAI?'#8b5cf6':'#10b981',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#4a5568',font:{family:'Share Tech Mono',size:10}}}},scales:{y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#4a5568',font:{family:'Share Tech Mono',size:9}}},x:{grid:{display:false},ticks:{color:'#4a5568',font:{family:'Share Tech Mono',size:9}},title:{display:true,text:'Words per sentence',color:'#4a5568',font:{family:'Share Tech Mono',size:9}}}}}});
+  document.getElementById('t-sigs').innerHTML=R.sigs.map(s=>`<div class="sig"><div class="sig-ico">${s.i}</div><div><div class="sig-t ${s.cls}">${s.t}</div><div class="sig-d">${s.d}</div></div></div>`).join('');
+  setTimeout(()=>document.getElementById('tres').scrollIntoView({behavior:'smooth',block:'nearest'}),150);
+}
+
+// ══════════ PASSWORD ══════════
+const CMPW=['password','123456','password123','admin','qwerty','abc123','monkey','letmein','trustno1','welcome','iloveyou'];
+const CMWD=['password','pass','qwerty','hello','love','admin','test','monkey','dragon','master','soccer','baseball','shadow','michael'];
+
+function livePw(){
+  const pw=document.getElementById('pwin').value;
+  const checks=[pw.length>=8,/[A-Z]/.test(pw),/[a-z]/.test(pw),/[0-9]/.test(pw),/[!@#$%^&*()\-_=+\[\]{};:'",.<>?]/.test(pw),!CMWD.some(w=>pw.toLowerCase().includes(w))&&!CMPW.includes(pw.toLowerCase())];
+  let score=0;
+  checks.forEach((pass,i)=>{document.getElementById('r'+i).className='req '+(pass?'pass':'fail');if(pass)score++;});
+  const COLS=['','#ef4444','#ef4444','#f97316','#f59e0b','#10b981','#10b981'];
+  const cnt=Math.min(5,score);
+  for(let i=0;i<5;i++)document.getElementById('s'+i).style.background=i<cnt?COLS[cnt+1]:'rgba(255,255,255,0.05)';
+  const LBL=['','VERY WEAK','WEAK','MEDIUM','STRONG','VERY STRONG'];
+  const LC=['','var(--red)','var(--red)','var(--amber)','var(--green)','var(--green)'];
+  document.getElementById('slbl').textContent=pw.length>0?(LBL[cnt]||'VERY WEAK'):'Enter a password to check strength';
+  document.getElementById('slbl').style.color=pw.length>0?(LC[cnt]||'var(--red)'):'var(--muted)';
+}
+
+function toggleEye(){const i=document.getElementById('pwin');i.type=i.type==='password'?'text':'password';document.getElementById('eyebtn').textContent=i.type==='password'?'👁 SHOW':'🙈 HIDE';}
+
+function resetPw(){
+  document.getElementById('pwin').value='';
+  document.getElementById('pres').classList.remove('on');
+  for(let i=0;i<6;i++)document.getElementById('r'+i).className='req neu';
+  for(let i=0;i<5;i++)document.getElementById('s'+i).style.background='rgba(255,255,255,0.05)';
+  document.getElementById('slbl').textContent='Enter a password to check strength';
+  document.getElementById('slbl').style.color='var(--muted)';
+}
+
+function pwMetrics(pw){
+  let cs=0;if(/[a-z]/.test(pw))cs+=26;if(/[A-Z]/.test(pw))cs+=26;if(/[0-9]/.test(pw))cs+=10;if(/[!@#$%^&*\-_=+\[\]{};:'",.<>?]/.test(pw))cs+=32;
+  const ent=cs>0?+(pw.length*Math.log2(cs)).toFixed(1):0;
+  const vty=new Set(pw.split('')).size/pw.length;
+  const hasW=CMWD.some(w=>pw.toLowerCase().includes(w));
+  const isCm=CMPW.includes(pw.toLowerCase());
+  const hasSeq=/(?:0123|1234|2345|3456|4567|5678|6789|abcd|qwer|asdf|zxcv)/i.test(pw);
+  const hasRep=/(.)\1{2,}/.test(pw);
+  const hasDate=/(?:19|20)\d{2}|(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])/.test(pw);
+  const hasLeet=/[@3!1$0]/.test(pw)&&/[a-zA-Z]/.test(pw);
+  let str=0;
+  if(pw.length>=8)str+=15;if(pw.length>=12)str+=15;if(pw.length>=16)str+=10;
+  if(/[A-Z]/.test(pw))str+=15;if(/[a-z]/.test(pw))str+=10;if(/[0-9]/.test(pw))str+=15;if(/[!@#$%^&*]/.test(pw))str+=20;
+  if(isCm)str-=50;if(hasW&&pw.length<12)str-=15;if(hasSeq)str-=15;if(hasRep)str-=10;
+  str=Math.max(0,Math.min(100,str));
+  const huSigs=(hasW?1:0)+(hasDate?1:0)+(hasLeet?1:0)+(hasSeq?1:0);
+  let aiP=(!hasW&&!isCm&&!hasDate&&!hasLeet&&!hasSeq&&vty>0.75&&pw.length>=12)?72:30;
+  if(huSigs>=2)aiP=Math.max(8,aiP-huSigs*14);
+  if(vty>0.9&&pw.length>14)aiP=Math.min(90,aiP+15);
+  aiP=Math.min(95,Math.max(5,aiP));
+  const lbl=str>=85?'VERY STRONG':str>=70?'STRONG':str>=50?'MEDIUM':str>=30?'WEAK':'VERY WEAK';
+  return{ent,vty:+vty.toFixed(3),hasW,isCm,hasSeq,hasRep,hasDate,hasLeet,str,lbl,aiP,huP:100-aiP};
+}
+
+async function analyzePassword(){
+  const pw=document.getElementById('pwin').value;
+  if(!pw){toast('⚠ Enter a password first');return;}
+  document.getElementById('pbtn').disabled=true;
+  document.getElementById('pres').classList.remove('on');
+  const m=pwMetrics(pw);
+  showScan('ANALYZING PASSWORD...');
+  let R;
+  try{
+    const prompt=`Cybersecurity expert. Analyze this password for strength and whether it was AI/tool generated or human created.
+
+Password: ${pw}
+Length: ${pw.length} | Entropy: ${m.ent} bits | Char variety: ${(m.vty*100).toFixed(0)}%
+Has uppercase: ${/[A-Z]/.test(pw)} | lowercase: ${/[a-z]/.test(pw)} | numbers: ${/[0-9]/.test(pw)} | special: ${/[!@#$%^&*]/.test(pw)}
+Contains common word: ${m.hasW} | Is common password: ${m.isCm}
+Has sequential pattern (1234/qwerty): ${m.hasSeq} | Has repeated chars: ${m.hasRep}
+Has date pattern: ${m.hasDate} | Has leet speak (a→@): ${m.hasLeet}
+
+HUMAN passwords: contain real words, names, dates, birthdays, keyboard patterns, word+numbers (nikhil123), letter swaps (p@ss), personal meaning.
+AI/TOOL passwords: completely random, high entropy, all 4 char types, no words, generated by LastPass/1Password/AI.
+
+Respond ONLY with this JSON (no other text):
+{"strength_label":"STRONG","strength_score":78,"ai_probability":35,"human_probability":65,"primary_reason":"One-line reason","detailed_reason":"2-3 sentences","suggestions":["tip1","tip2"],"signals":[{"title":"Signal","description":"Detail","type":"strength"},{"title":"Signal","description":"Detail","type":"origin"},{"title":"Signal","description":"Detail","type":"origin"}]}`;
+    setScan(50,'RUNNING SECURITY ANALYSIS...');
+    const res=await claude([{role:'user',content:prompt}]);
+    setScan(100,'DONE!');await sleep(300);hideScan();
+    R={str:Math.min(100,Math.max(0,parseInt(res.strength_score)||m.str)),lbl:res.strength_label||m.lbl,aiP:Math.min(99,Math.max(1,parseInt(res.ai_probability)||m.aiP)),huP:Math.min(99,Math.max(1,parseInt(res.human_probability)||m.huP)),reason:`<strong>${res.primary_reason}</strong><br><br>${res.detailed_reason}`,sugs:res.suggestions||[],sigs:(res.signals||[]).map(s=>({i:s.type==='strength'?'🛡':'🔍',t:s.title.toUpperCase(),cls:'human',d:`<strong>${s.description}</strong>`}))};
+    toast('✓ Password analyzed!');
+  }catch(e){
+    hideScan();
+    const sugs=[];
+    if(pw.length<12)sugs.push('Make it longer — 12+ characters recommended');
+    if(!/[!@#$%^&*]/.test(pw))sugs.push('Add special characters like !@#$%^&*');
+    if(!/[0-9]/.test(pw))sugs.push('Add numbers (0-9)');
+    if(!/[A-Z]/.test(pw))sugs.push('Add uppercase letters (A-Z)');
+    if(m.hasW)sugs.push('Avoid common words — use random characters');
+    if(m.isCm)sugs.push('⚠ This is a very common password — change it immediately!');
+    if(m.hasSeq)sugs.push('Avoid keyboard patterns like 1234 or qwerty');
+    if(m.hasDate)sugs.push('Never use birth dates or years in passwords');
+    if(sugs.length===0)sugs.push('Great password! Store it in a password manager.');
+    const sigs=[];
+    sigs.push({i:'🛡',t:'ENTROPY LEVEL',cls:'human',d:`<strong>Entropy: ${m.ent} bits</strong> — ${m.ent>60?'Strong randomness, hard to crack by brute force.':'Could be more random. Higher entropy = harder to crack.'}`});
+    if(m.hasW)sigs.push({i:'🧠',t:'REAL WORD DETECTED',cls:'human',d:'<strong>Contains a recognizable word</strong> — Human-created passwords often use real words that are meaningful to them.'});
+    if(m.hasDate)sigs.push({i:'🧠',t:'DATE PATTERN FOUND',cls:'human',d:'<strong>Contains a date pattern</strong> — Using birth years or dates is classic human behavior when making passwords.'});
+    if(m.hasLeet)sigs.push({i:'🧠',t:'LEET SPEAK DETECTED',cls:'human',d:'<strong>Contains letter substitutions (a→@ or e→3)</strong> — Classic human technique to make passwords "stronger" while keeping them memorable.'});
+    if(m.vty>0.8&&pw.length>12&&!m.hasW)sigs.push({i:'🤖',t:'HIGH RANDOMNESS DETECTED',cls:'ai',d:`<strong>Very high character variety (${(m.vty*100).toFixed(0)}%)</strong> — Looks like it was generated by a password manager or AI tool.`});
+    R={str:m.str,lbl:m.lbl,aiP:m.aiP,huP:m.huP,reason:`<strong>Local security analysis</strong><br><br>Entropy: ${m.ent} bits · Character variety: ${(m.vty*100).toFixed(0)}% · Length: ${pw.length} characters.`,sugs,sigs};
+    toast('⚡ Analysis complete');
+  }
+  displayPw(R,m,pw);
+  document.getElementById('pbtn').disabled=false;
+}
+
+function displayPw(R,m,pw){
+  document.getElementById('pres').classList.add('on');
+  const SC={'VERY WEAK':'var(--red)','WEAK':'var(--red)','MEDIUM':'var(--amber)','STRONG':'var(--green)','VERY STRONG':'var(--green)'};
+  const SB={'VERY WEAK':'bweak','WEAK':'bweak','MEDIUM':'bmedium','STRONG':'bstrong','VERY STRONG':'bstrong'};
+  const SI={'VERY WEAK':'💀','WEAK':'⚠','MEDIUM':'🔶','STRONG':'🛡','VERY STRONG':'🔒'};
+  const k=(R.lbl||'MEDIUM').toUpperCase();
+  const col=SC[k]||'var(--amber)';
+  document.getElementById('pe').textContent=SI[k]||'🔶';
+  const le=document.getElementById('pl');le.textContent=k+' PASSWORD';le.className='vlabel col-'+(R.str>=70?'strong':R.str>=50?'medium':'weak');
+  document.getElementById('pr').innerHTML=R.reason;
+  setTimeout(()=>{
+    setRing('pr-ring',R.str,col);
+    document.getElementById('pr-pct').textContent=R.str+'%';document.getElementById('pr-pct').style.color=col;
+    document.getElementById('p-sb').style.width=R.str+'%';document.getElementById('p-sb').className='bfill '+(SB[k]||'bmedium');
+    document.getElementById('p-sp').textContent=R.str+'%';document.getElementById('p-sp').style.color=col;
+    document.getElementById('p-aib').style.width=R.aiP+'%';document.getElementById('p-aip').textContent=R.aiP+'%';
+    document.getElementById('p-hb').style.width=R.huP+'%';document.getElementById('p-hp').textContent=R.huP+'%';
+  },200);
+  document.getElementById('p-met').innerHTML=[{v:pw.length,l:'LENGTH'},{v:m.ent+' bits',l:'ENTROPY'},{v:(m.vty*100).toFixed(0)+'%',l:'VARIETY'},{v:/[A-Z]/.test(pw)?'✓':'✗',l:'UPPERCASE'},{v:/[0-9]/.test(pw)?'✓':'✗',l:'NUMBERS'},{v:/[!@#$%]/.test(pw)?'✓':'✗',l:'SPECIAL'}].map(x=>`<div class="mc"><div class="mcv">${x.v}</div><div class="mcl">${x.l}</div></div>`).join('');
+  document.getElementById('p-sugs').innerHTML=(R.sugs||[]).map(s=>`<div class="sug">⚠ ${s}</div>`).join('');
+  document.getElementById('p-sigs').innerHTML=(R.sigs||[]).map(s=>`<div class="sig"><div class="sig-ico">${s.i}</div><div><div class="sig-t ${s.cls||'human'}">${s.t}</div><div class="sig-d">${s.d}</div></div></div>`).join('');
+  setTimeout(()=>document.getElementById('pres').scrollIntoView({behavior:'smooth',block:'nearest'}),150);
+}
+
+function genPw(n){
+  const up=document.getElementById('gU').checked,lw=document.getElementById('gL').checked;
+  const nm=document.getElementById('gN').checked,sp=document.getElementById('gS').checked;
+  const mem=document.getElementById('gM').checked;
+  const len=parseInt(document.getElementById('lr').value);
+  let cs='';if(up)cs+='ABCDEFGHIJKLMNOPQRSTUVWXYZ';if(lw)cs+='abcdefghijklmnopqrstuvwxyz';if(nm)cs+='0123456789';if(sp)cs+='!@#$%^&*()-_=+[]{}';
+  if(!cs&&!mem){toast('⚠ Select at least one option');return;}
+  const WS=['Cloud','Storm','Tiger','Eagle','River','Stone','Flame','Ocean','Forest','Thunder','Crystal','Shadow','Phoenix','Falcon','Silver','Dragon'];
+  const out=document.getElementById('gout');
+  for(let x=0;x<n;x++){
+    let pw='';
+    if(mem){const w1=WS[Math.floor(Math.random()*WS.length)],w2=WS[Math.floor(Math.random()*WS.length)];pw=w1+w2+Math.floor(Math.random()*9000+1000)+(sp?'!@#$%'[Math.floor(Math.random()*5)]:'');}
+    else{const must=[];if(up)must.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random()*26)]);if(lw)must.push('abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random()*26)]);if(nm)must.push('0123456789'[Math.floor(Math.random()*10)]);if(sp)must.push('!@#$%^&*'[Math.floor(Math.random()*8)]);while(pw.length<len)pw+=cs[Math.floor(Math.random()*cs.length)];pw=[...pw.split(''),...must].sort(()=>Math.random()-0.5).slice(0,Math.max(len,must.length)).join('');}
+    const d=document.createElement('div');d.className='gpw';const esc=pw.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    d.innerHTML=`<span style="flex:1;word-break:break-all;">${pw}</span><button class="cpybtn" onclick="navigator.clipboard.writeText('${esc}').then(()=>toast('✓ Copied!'))">COPY</button>`;
+    out.insertBefore(d,out.firstChild);if(out.children.length>6)out.removeChild(out.lastChild);
+  }
+}
+
+// ══════════ IMAGE ══════════
+const dzEl=document.getElementById('dz');
+dzEl.addEventListener('dragover',e=>{e.preventDefault();dzEl.classList.add('drag');});
+dzEl.addEventListener('dragleave',()=>dzEl.classList.remove('drag'));
+dzEl.addEventListener('drop',e=>{
+  e.preventDefault();dzEl.classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/'))loadImg(f);
+  else toast('⚠ Drop an image file');
+});
+let cFile=null,cB64=null;
+function onImg(e){const f=e.target.files[0];if(f)loadImg(f);}
+
+function loadImg(file){
+  cFile=file;
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    cB64=ev.target.result.split(',')[1];
+    const img=document.getElementById('pimg');
+    img.onload=()=>{
+      document.getElementById('imgPrev').style.display='block';
+      document.getElementById('ires').classList.remove('on');
+      buildChips(file,img);
+      buildNmap(img);
+      toast('✓ Image loaded — click Analyze');
+    };
+    img.src=ev.target.result;
+  };
+  rd.readAsDataURL(file);
+}
+
+function buildChips(f,img){
+  const sz=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':(f.size/1024).toFixed(0)+' KB';
+  document.getElementById('ichips').innerHTML=[
+    ['FORMAT',f.name.split('.').pop().toUpperCase()],
+    ['WIDTH',img.naturalWidth+'px'],
+    ['HEIGHT',img.naturalHeight+'px'],
+    ['SIZE',sz],
+    ['PIXELS',(img.naturalWidth*img.naturalHeight).toLocaleString()],
+    ['TYPE',f.type.split('/')[1].toUpperCase()]
+  ].map(([l,v])=>`<div class="ichip"><div class="icv">${v}</div><div class="icl">${l}</div></div>`).join('');
+}
+
+function buildNmap(img){
+  const oc=document.getElementById('offC'),W=120,H=Math.round(120*img.naturalHeight/img.naturalWidth);
+  oc.width=W;oc.height=H;
+  const ctx=oc.getContext('2d');ctx.drawImage(img,0,0,W,H);
+  const d=ctx.getImageData(0,0,W,H).data;
+  const nc=document.getElementById('nmap');nc.width=W;nc.height=H;
+  const vc=nc.getContext('2d');const od=vc.createImageData(W,H);
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    const i=(y*W+x)*4;
+    const lap=Math.abs(4*d[i]-d[(y*W+x-1)*4]-d[(y*W+x+1)*4]-d[((y-1)*W+x)*4]-d[((y+1)*W+x)*4]);
+    const gx=Math.abs(d[(y*W+x+1)*4]-d[(y*W+x-1)*4]);
+    const gy=Math.abs(d[((y+1)*W+x)*4]-d[((y-1)*W+x)*4]);
+    od.data[i]=Math.min(255,lap*2);
+    od.data[i+1]=Math.min(255,(gx+gy)/2);
+    od.data[i+2]=50;
+    od.data[i+3]=255;
+  }
+  vc.putImageData(od,0,0);
+}
+
+function getPixels(img){
+  const oc=document.getElementById('offC');
+  const W=Math.min(260,img.naturalWidth);
+  const H=Math.round(W*img.naturalHeight/img.naturalWidth);
+  oc.width=W;oc.height=H;
+  const ctx=oc.getContext('2d');ctx.drawImage(img,0,0,W,H);
+  const d=ctx.getImageData(0,0,W,H).data;
+  const N=W*H;
+  const avg=a=>a.reduce((s,v)=>s+v,0)/a.length;
+  const std=a=>{const m=avg(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length);};
+
+  // Luminance values
+  const L=[];
+  for(let i=0;i<d.length;i+=4) L.push(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]);
+
+  // Laplacian noise — measures local irregularity (camera grain)
+  const ns=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    const i=(y*W+x)*4;
+    ns.push(Math.abs(4*d[i]-d[(y*W+x-1)*4]-d[(y*W+x+1)*4]-d[((y-1)*W+x)*4]-d[((y+1)*W+x)*4]));
+  }
+  const noise=+avg(ns).toFixed(2);
+  const noiseStd=+std(ns.slice(0,5000)).toFixed(2);
+
+  // Sobel edge detection — hard edges (cartoons) vs soft edges (real photos)
+  let hardE=0,softE=0;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    const g=(dy,dx)=>{const ii=((y+dy)*W+(x+dx))*4;return 0.299*d[ii]+0.587*d[ii+1]+0.114*d[ii+2];};
+    const gx=-g(-1,-1)+g(-1,1)-2*g(0,-1)+2*g(0,1)-g(1,-1)+g(1,1);
+    const gy=g(-1,-1)+2*g(-1,0)+g(-1,1)-g(1,-1)-2*g(1,0)-g(1,1);
+    const mg=Math.sqrt(gx*gx+gy*gy);
+    if(mg>90)hardE++; else if(mg>18)softE++;
+  }
+  const edgeRatio=+(hardE/(softE+1)).toFixed(3);
+
+  // Color palette — cartoons use few colors, real photos use thousands
+  const p12=new Set(), p24=new Set();
+  for(let i=0;i<d.length;i+=4){
+    p12.add((Math.floor(d[i]/12)<<8)|(Math.floor(d[i+1]/12)<<4)|Math.floor(d[i+2]/12));
+    p24.add((Math.floor(d[i]/24)<<6)|(Math.floor(d[i+1]/24)<<3)|Math.floor(d[i+2]/24));
+  }
+  const palette=p12.size;
+  const coarse=p24.size;
+
+  // Flat region ratio — cartoons have large same-color areas
+  let flat=0,total=0;
+  for(let y=1;y<H-1;y+=2)for(let x=1;x<W-1;x+=2){
+    total++;
+    const i=(y*W+x)*4;
+    const neighbors=[(y*W+x+1)*4,(y*W+x-1)*4,((y+1)*W+x)*4,((y-1)*W+x)*4];
+    if(neighbors.every(ii=>
+      Math.abs(d[i]-d[ii])<8&&Math.abs(d[i+1]-d[ii+1])<8&&Math.abs(d[i+2]-d[ii+2])<8
+    )) flat++;
+  }
+  const flatRatio=+(flat/total).toFixed(3);
+
+  // Gradient smoothness — AI images have perfect artificial gradients
+  let smooth=0,gTotal=0;
+  for(let y=2;y<H-2;y+=3)for(let x=2;x<W-2;x+=3){
+    const a=(y*W+x)*4,b=(y*W+x+1)*4,c=(y*W+x+2)*4;
+    const diff1=Math.abs(d[a]-d[b]), diff2=Math.abs(d[b]-d[c]);
+    if(Math.abs(diff1-diff2)<2&&diff1<8) smooth++;
+    gTotal++;
+  }
+  const gradSmooth=+(gTotal?smooth/gTotal:0).toFixed(3);
+
+  // Brightness histogram
+  const bH=new Array(32).fill(0);
+  L.forEach(v=>bH[Math.min(31,Math.floor(v/8))]++);
+
+  // Shannon entropy of brightness — real photos have rich, complex patterns
+  const entropy=+bH.reduce((e,c)=>{const p=c/N;return p>0?e-p*Math.log2(p):e;},0).toFixed(3);
+
+  // High-frequency texture ratio — real photos are textured everywhere
+  let hiF=0, loF=0;
+  for(let by=0;by<H-8;by+=8)for(let bx=0;bx<W-8;bx+=8){
+    const bp=[];
+    for(let dy=0;dy<8;dy++)for(let dx=0;dx<8;dx++){
+      const ii=((by+dy)*W+(bx+dx))*4;
+      bp.push(0.299*d[ii]+0.587*d[ii+1]+0.114*d[ii+2]);
+    }
+    std(bp)>20?hiF++:loF++;
+  }
+  const texRatio=+(hiF/(hiF+loF+1)).toFixed(3);
+
+  // Saturation — cartoons use vivid/pure colors
+  let satSum=0;
+  for(let i=0;i<d.length;i+=4){
+    const mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]);
+    satSum+=mx>0?(mx-mn)/mx:0;
+  }
+  const avgSat=+(satSum/N).toFixed(3);
+
+  return{noise,noiseStd,palette,coarse,flatRatio,edgeRatio,gradSmooth,entropy,texRatio,avgSat,bH,
+    isGIF:cFile.type==='image/gif',isJPEG:cFile.type==='image/jpeg'};
+}
+
+// ── PIXEL-ONLY FALLBACK (used only when API fails) ──
+// This is a BACKUP only. Visual AI is always more accurate.
+// Key insight: black & white photos, compressed JPEGs, low-res scans all have
+// unusual pixel stats but are still REAL photos. We must be conservative.
+function scorePixels(px){
+  const signals=[];
+  let score=0; // positive = real, negative = fake
+
+  // ── Is it black & white / grayscale? ──
+  // B&W photos have low saturation — real people take B&W photos too!
+  const isBW = px.avgSat < 0.08;
+  if(isBW){
+    // B&W photo — be very conservative, lean toward real
+    score += 20;
+    signals.push({real:true, title:'BLACK & WHITE / GRAYSCALE IMAGE',
+      detail:`<strong>Very low saturation (${(px.avgSat*100).toFixed(1)}%)</strong> — This appears to be a black & white or grayscale image. Many real photos are taken in B&W mode. Pixel-only detection is less reliable for B&W images — visual analysis gives better results.`});
+  }
+
+  // ── Camera noise ──
+  // Real photos: 8–80 noise. Cartoons: 0–5. AI images: varies widely (5–60).
+  // B&W photos often show higher noise due to single channel compression.
+  if(px.noise >= 8 && px.noise <= 85){
+    score += isBW ? 15 : 25;
+    signals.push({real:true, title:'NATURAL NOISE LEVEL',
+      detail:`<strong>Noise: ${px.noise}</strong> — Noise level is within the range expected for real camera photos (8–85). This suggests the image was captured by a real device, not purely generated.`});
+  } else if(px.noise < 5){
+    score -= 30;
+    signals.push({real:false, title:'NEAR-ZERO NOISE — NOT A CAMERA',
+      detail:`<strong>Noise: ${px.noise}</strong> — Almost no pixel noise. Real cameras always produce grain. This image appears mathematically generated (cartoon or simple AI art).`});
+  }
+
+  // ── High flat regions = cartoon/simple drawing ──
+  // But B&W photos of plain backgrounds can also have flat areas — be careful
+  const flatThreshold = isBW ? 0.60 : 0.45;
+  if(px.flatRatio > flatThreshold){
+    score -= 28;
+    signals.push({real:false, title:'LARGE FLAT COLOR AREAS',
+      detail:`<strong>${(px.flatRatio*100).toFixed(0)}% flat regions</strong> — Large same-color blocks detected. Real photos rarely have this many perfectly flat areas. Suggests drawn or cartoon image.`});
+  } else if(px.flatRatio < 0.22){
+    score += 15;
+    signals.push({real:true, title:'COMPLEX TEXTURE THROUGHOUT',
+      detail:`<strong>${(px.flatRatio*100).toFixed(0)}% flat regions</strong> — Very few flat areas. Real photos are texturally complex from natural variation in lighting and surfaces.`});
+  }
+
+  // ── Very limited color = cartoon (but B&W photos naturally have few colors) ──
+  if(!isBW){
+    if(px.coarse < 40){
+      score -= 32;
+      signals.push({real:false, title:'VERY FEW DISTINCT COLORS',
+        detail:`<strong>Only ${px.coarse} color groups</strong> — Extremely limited color variety. Real color photos always contain hundreds of subtly different shades. This is typical of drawn/cartoon images.`});
+    } else if(px.coarse > 150){
+      score += 18;
+      signals.push({real:true, title:'RICH COLOR VARIETY',
+        detail:`<strong>${px.coarse} distinct color groups</strong> — Rich variety of colors present, consistent with a real photograph capturing the natural world.`});
+    }
+  }
+
+  // ── Hard cartoon outlines ──
+  if(px.edgeRatio > 0.90 && !isBW){
+    score -= 22;
+    signals.push({real:false, title:'CARTOON HARD OUTLINES',
+      detail:`<strong>Edge ratio: ${px.edgeRatio}</strong> — Very sharp, uniform edges everywhere. Real camera photos have soft organic blur. This suggests a drawn or animated image.`});
+  }
+
+  // ── GIF format = always animation ──
+  if(px.isGIF){ score -= 60; }
+
+  // ── High smoothness in color images = AI generation ──
+  if(!isBW && px.gradSmooth > 0.55 && px.noise < 15){
+    score -= 20;
+    signals.push({real:false, title:'UNNATURALLY SMOOTH GRADIENTS',
+      detail:`<strong>Smoothness: ${(px.gradSmooth*100).toFixed(0)}%</strong> — Color transitions are mathematically perfect with very low noise. Real photos have organic variation. Possible AI-generated image.`});
+  }
+
+  // ── When API is unavailable, default to UNCERTAIN / slight lean real ──
+  // Better to say "probably real" than wrongly accuse a real photo of being fake
+  score += 8; // slight real bias when we can't use visual AI
+
+  // Normalize to probability
+  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+  const normalized = clamp((score + 100) / 200, 0, 1);
+  const pReal = Math.round(clamp(normalized * 100, 10, 90));
+  const pFake = 100 - pReal;
+  const isReal = pReal >= pFake;
+  const confidence = Math.max(pReal, pFake);
+
+  return{isReal, confidence, pReal, pFake, signals};
+}
+
+async function analyzeImg(){
+  if(!cFile||!cB64){toast('\u26a0 Upload an image first');return;}
+  document.getElementById('ibtn').disabled=true;
+  document.getElementById('ires').classList.remove('on');
+
+  const img=document.getElementById('pimg');
+  const px=getPixels(img);
+
+  const steps=[
+    'SCANNING PIXEL DATA...',
+    'LOADING IMAGE FOR VISUAL ANALYSIS...',
+    'EXAMINING IMAGE CONTENT...',
+    'CHECKING FOR AI GENERATION SIGNS...',
+    'CHECKING FOR REAL PHOTO SIGNS...',
+    'CROSS-REFERENCING ALL SIGNALS...',
+    'GENERATING VERDICT...'
+  ];
+  showScan(steps[0]);let si=0;
+  const iv=setInterval(()=>{
+    if(si<steps.length){setScan((si+1)/steps.length*78,steps[si]);si++;}
+  },320);
+
+  let finalResult;
+
+  try{
+    // The Claude Vision API is the PRIMARY detector.
+    // Pixel math CANNOT reliably tell apart a real mountain photo from an AI mountain image.
+    // Only visual understanding can do this.
+    const prompt=`You are an expert forensic image analyst specializing in detecting AI-generated images vs real photographs.
+
+TASK: Look carefully at this image and determine if it is:
+- REAL: A genuine photograph taken by a real person using a real phone or camera of something that actually exists in the physical world
+- FAKE: Any image that was NOT captured by a real camera — including AI-generated images (Midjourney, Stable Diffusion, DALL-E, Firefly), cartoons, anime, animations, digital art, CGI, or any digitally created image
+
+KEY VISUAL INDICATORS OF AI-GENERATED IMAGES:
+1. PERFECT COMPOSITION — Real photos are slightly off-center, imperfect. AI images have magazine-perfect composition.
+2. FANTASY/UNREALISTIC ELEMENTS — Glowing waterfalls, perfect sunsets with multiple light sources, impossibly lush scenery, dream-like lighting that cannot exist naturally.
+3. TOO PERFECT LIGHTING — Multiple dramatic light sources simultaneously (sunset glow + cabin light + waterfall glow + mountain rim light all at once). Real photos have one main light source.
+4. OVERLY DETAILED EVERYTHING — AI images add perfect detail to every corner. Real photos have some areas that are plain or out of focus.
+5. SURREAL COLOR PALETTE — Vivid, oversaturated colors that look enhanced. Too many colors "popping" at the same time.
+6. SUBJECTS THAT DEFY REALITY — Perfect fantasy cabins in impossible locations, mythical creatures, scenes that could only exist in a painting.
+7. TEXTURE INCONSISTENCY — Some parts look hyper-detailed, others look slightly "painted" or "generated".
+8. NO CAMERA METADATA FEEL — No lens distortion, no natural grain distribution, no real-world perspective imperfections.
+9. VISUAL NOISE PATTERN — AI images often have a specific "digital noise" that looks like confetti/speckles rather than organic camera grain.
+
+KEY INDICATORS OF REAL PHOTOGRAPHS:
+1. Imperfect framing and composition
+2. Natural single or dual light sources
+3. Real-world imperfections (dirt, wear, shadows that are not perfectly placed)
+4. Lens characteristics: bokeh, lens flare, chromatic aberration
+5. Real people, real places recognizable from the real world
+6. Natural skin tones and textures
+7. Nothing too perfect or too fantastical
+
+LOOK AT THIS IMAGE NOW. 
+
+Does it show something that COULD ACTUALLY EXIST in the real world and be photographed with a real camera?
+OR does it show something that looks AI-generated, too perfect, too fantastical, or clearly drawn/animated?
+
+Respond ONLY with valid JSON, nothing else:
+{
+  "verdict": "FAKE",
+  "real_pct": 5,
+  "fake_pct": 95,
+  "confidence": 95,
+  "one_line": "AI-generated fantasy landscape with impossible lighting and dreamlike perfection",
+  "explanation": "This image shows clear signs of AI generation: multiple simultaneous dramatic light sources (sunset glow, cabin lights, waterfall luminescence), hyper-perfect composition, impossibly lush and vibrant scenery, and the characteristic dream-like quality of Stable Diffusion or Midjourney outputs. No real camera could capture this scene because it does not exist in reality.",
+  "why_signals": [
+    {"title": "Impossible simultaneous lighting", "detail": "The image has a golden sunset, glowing cabin lights, luminescent water, AND rim-lit mountains all at the same intensity simultaneously — physically impossible in a real scene", "is_real": false},
+    {"title": "Fantasy composition too perfect", "detail": "The cabin, waterfall, mountains, sunset and dock are all arranged with picture-perfect magazine composition that real unplanned photographs never achieve", "is_real": false},
+    {"title": "Dreamlike oversaturated colors", "detail": "Turquoise water, perfect orange sky, vivid purple flowers and emerald trees all simultaneously vibrant — real photos have natural color falloff and variation", "is_real": false},
+    {"title": "Scene does not exist in reality", "detail": "This exact combination of alpine lake, tropical-colored water, waterfall, cabin and sunset lighting exists only in AI-generated fantasy imagery", "is_real": false}
+  ]
+}`;
+
+    clearInterval(iv);
+    setScan(85,'RUNNING VISUAL AI ANALYSIS...');
+
+    const res=await claude([{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:cFile.type,data:cB64}},
+      {type:'text',text:prompt}
+    ]}], 1200);
+
+    setScan(100,'DONE!');await sleep(300);hideScan();
+
+    const isReal=res.verdict==='REAL';
+    const pReal=Math.min(97,Math.max(3,parseInt(res.real_pct)||50));
+    const pFake=100-pReal;
+    const conf=Math.min(97,Math.max(55,parseInt(res.confidence)||70));
+
+    finalResult={
+      isReal,
+      confidence:conf,
+      pReal,
+      pFake,
+      oneLine:res.one_line||'',
+      explanation:res.explanation||'',
+      signals:(res.why_signals||[]).map(s=>({
+        real:s.is_real===true,
+        title:s.title,
+        detail:s.detail
+      }))
+    };
+    toast('\u2713 Image analyzed!');
+
+  }catch(e){
+    clearInterval(iv);hideScan();
+    console.warn('API failed, using pixel fallback. Error:', e.message);
+    const pixScore=scorePixels(px);
+    // When API fails, we show a warning but still give best-effort result
+    finalResult={
+      isReal:pixScore.isReal,
+      confidence:Math.min(pixScore.confidence, 72), // cap confidence when no visual AI
+      pReal:pixScore.pReal,
+      pFake:pixScore.pFake,
+      oneLine:'⚠ Visual AI analysis unavailable — pixel analysis only',
+      explanation:'<span style="color:var(--amber);font-weight:bold;">WARNING: The visual AI analysis could not run.</span> Pixel-only analysis has LIMITED accuracy and CANNOT reliably distinguish AI-generated realistic images from real photos. This result may be incorrect. <br><br>The pixel analysis looks at: noise level, color variety, flat regions, and edge sharpness only — it cannot understand the actual content of the image.',
+      signals:pixScore.signals.map(s=>({real:s.real!==false,title:s.title,detail:s.detail}))
+    };
+    toast('\u26a0 Visual AI unavailable — pixel analysis only (limited accuracy)');
+  }
+
+  displayImg(finalResult,px);
+  document.getElementById('ibtn').disabled=false;
+}
+
+function displayImg(R,px){
+  document.getElementById('ires').classList.add('on');
+  setTimeout(()=>document.getElementById('ires').scrollIntoView({behavior:'smooth',block:'start'}),100);
+
+  const col=R.isReal?'#10b981':'#8b5cf6';
+  const conf=Math.min(97,Math.max(52,R.confidence));
+
+  // Update the big banner
+  const isPixelOnly = R.oneLine && R.oneLine.includes('unavailable');
+  const banner=document.getElementById('iverdictBanner');
+  // If pixel-only: show amber warning border, not confident green/purple
+  const bannerCol = isPixelOnly ? '#f59e0b' : col;
+  banner.style.borderColor=bannerCol;
+  banner.style.background=isPixelOnly?'rgba(245,158,11,0.05)':(R.isReal?'rgba(16,185,129,0.05)':'rgba(139,92,246,0.05)');
+
+  document.getElementById('ivIcon').textContent=isPixelOnly?'⚠':(R.isReal?'📸':'🤖');
+  const lbl=document.getElementById('ivLabel');
+  if(isPixelOnly){
+    lbl.textContent='RESULT UNCERTAIN';
+    lbl.style.color='#f59e0b';
+  } else {
+    lbl.textContent=R.isReal?'REAL HUMAN PHOTO':'AI / FAKE IMAGE';
+    lbl.style.color=col;
+  }
+  const sub=document.getElementById('ivSub');
+  let subText='';
+  if(R.oneLine) subText=`<strong style="color:${bannerCol}">${R.oneLine}</strong>`;
+  if(R.explanation) subText+=(subText?'<br><br>':'')+R.explanation;
+  if(!isPixelOnly && R.isReal) subText+='<br><br><span style="color:#10b981;font-size:0.75rem;">✓ This image shows characteristics of a genuine photograph taken by a real camera or phone.</span>';
+  if(!isPixelOnly && !R.isReal) subText+='<br><br><span style="color:#8b5cf6;font-size:0.75rem;">✗ This image was not taken by a real camera — it was created by software (AI generator, cartoon tool, or drawing program).</span>';
+  sub.innerHTML=subText||'Analysis complete.';
+
+  // Confidence ring
+  setTimeout(()=>{
+    setRing('ir-ring',conf,col);
+    document.getElementById('ir-pct').textContent=conf+'%';
+    document.getElementById('ir-pct').style.color=col;
+  },200);
+
+  // Bars
+  const pR=Math.min(97,Math.max(3,R.pReal));
+  const pF=100-pR;
+  setTimeout(()=>{
+    document.getElementById('ibReal').style.width=pR+'%';
+    document.getElementById('ibFake').style.width=pF+'%';
+  },300);
+  document.getElementById('ipReal').textContent=pR+'%';
+  document.getElementById('ipFake').textContent=pF+'%';
+
+  // Pixel stats grid — green=points to real, purple=points to fake
+  const G='#10b981',VI='#8b5cf6',AM='#f59e0b';
+  document.getElementById('i-met').innerHTML=[
+    {v:px.noise,       l:'CAMERA NOISE',  c:px.noise>=10&&px.noise<=75?G:px.noise>6?AM:VI},
+    {v:px.palette.toLocaleString(), l:'COLOR PALETTE', c:px.palette>2000?G:px.palette>600?AM:VI},
+    {v:px.coarse,      l:'COLOR GROUPS',  c:px.coarse>180?G:px.coarse>60?AM:VI},
+    {v:(px.flatRatio*100).toFixed(0)+'%', l:'FLAT REGIONS', c:px.flatRatio<0.20?G:px.flatRatio<0.40?AM:VI},
+    {v:(px.gradSmooth*100).toFixed(0)+'%',l:'SMOOTHNESS',   c:px.gradSmooth<0.35?G:px.gradSmooth<0.55?AM:VI},
+    {v:px.edgeRatio.toFixed(2),    l:'EDGE SHARP',   c:px.edgeRatio<0.35?G:px.edgeRatio<0.70?AM:VI},
+    {v:px.entropy.toFixed(2),      l:'ENTROPY',      c:px.entropy>3.8?G:px.entropy>2.5?AM:VI},
+    {v:(px.texRatio*100).toFixed(0)+'%',  l:'TEXTURE',      c:px.texRatio>0.25?G:px.texRatio>0.12?AM:VI}
+  ].map(x=>`<div class="mc"><div class="mcv" style="color:${x.c}">${x.v}</div><div class="mcl">${x.l}</div></div>`).join('');
+
+  // Radar chart — higher values = more like a real photo
+  kc('i-rad');
+  CH['i-rad']=new Chart(document.getElementById('i-rad'),{
+    type:'radar',
+    data:{
+      labels:['Noise','Palette','No Flat','No Smooth','Entropy','Texture','Soft Edges'],
+      datasets:[
+        {label:'This Image',
+          data:[
+            Math.min(100,px.noise*1.4),
+            Math.min(100,px.palette/28),
+            Math.max(0,100-px.flatRatio*180),
+            Math.max(0,100-px.gradSmooth*100),
+            px.entropy*18,
+            px.texRatio*100,
+            Math.max(0,100-px.edgeRatio*100)
+          ],
+          borderColor:col,backgroundColor:col+'22',pointBackgroundColor:col,borderWidth:2,pointRadius:3},
+        {label:'Typical Real Photo',
+          data:[72,88,83,70,84,62,72],
+          borderColor:'rgba(255,255,255,0.15)',backgroundColor:'transparent',
+          borderDash:[4,4],pointRadius:2,borderWidth:1.5}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#4a5568',font:{family:'Share Tech Mono',size:10}}}},
+      scales:{r:{angleLines:{color:'rgba(255,255,255,0.04)'},grid:{color:'rgba(255,255,255,0.04)'},
+        ticks:{color:'#4a5568',backdropColor:'transparent',font:{size:8}},
+        pointLabels:{color:'#718096',font:{size:9,family:'Share Tech Mono'}},
+        min:0,max:100}}}
+  });
+
+  // Brightness histogram
+  kc('i-his');
+  CH['i-his']=new Chart(document.getElementById('i-his'),{
+    type:'bar',
+    data:{
+      labels:Array.from({length:32},(_,i)=>i*8),
+      datasets:[{
+        label:'Brightness Distribution',
+        data:px.bH,
+        backgroundColor:col+'55',
+        borderColor:col,
+        borderWidth:1
+      }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#4a5568',font:{family:'Share Tech Mono',size:10}}}},
+      scales:{
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#4a5568',font:{family:'Share Tech Mono',size:9}}},
+        x:{grid:{display:false},
+          ticks:{color:'#4a5568',font:{family:'Share Tech Mono',size:8},maxTicksLimit:8},
+          title:{display:true,text:'Brightness (0=black → 255=white)',color:'#4a5568',font:{family:'Share Tech Mono',size:9}}}
+      }}
+  });
+
+  // Detection signals
+  document.getElementById('i-sigs').innerHTML=(R.signals||[]).filter(s=>s.title).map(s=>{
+    const isRealSig=s.real!==false;
+    return `<div class="sig">
+      <div class="sig-ico">${isRealSig?'📸':'🤖'}</div>
+      <div>
+        <div class="sig-t ${isRealSig?'human':'ai'}">${s.title.toUpperCase()}</div>
+        <div class="sig-d">${s.detail}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetImg(){
+  cFile=null;cB64=null;
+  document.getElementById('iin').value='';
+  document.getElementById('imgPrev').style.display='none';
+  document.getElementById('ires').classList.remove('on');
+  document.getElementById('pimg').src='';
+  toast('✓ Reset');
+}
+</script>
+</body>
+</html>
